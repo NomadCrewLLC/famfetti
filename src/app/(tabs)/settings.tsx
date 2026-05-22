@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,6 +11,7 @@ import { useAuthStore } from '@/store/auth';
 
 export default function SettingsScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
   const onSignOut = async () => {
@@ -31,6 +33,12 @@ export default function SettingsScreen() {
             </ThemedText>
             <ThemedText type="default">{user?.email ?? '—'}</ThemedText>
           </View>
+
+          <Pressable
+            style={[styles.button, { borderColor: theme.backgroundSelected }]}
+            onPress={() => router.push('/profile')}>
+            <ThemedText type="smallBold">Edit profile</ThemedText>
+          </Pressable>
 
           <Pressable
             style={[styles.button, { borderColor: theme.backgroundSelected }]}
