@@ -32,22 +32,22 @@ Tracking progress against the original [spec](README.md). Check items off as you
 ## To do
 
 ### Profile
-- [ ] Edit profile screen (name, avatar)
+- [x] Edit profile screen — name only ([src/app/profile.tsx](src/app/profile.tsx))
 - [ ] Avatar upload to Supabase Storage
 - [ ] Per-user `notify_days_before` preference UI
 
 ### Family groups
-- [ ] `families` and `family_members` tables + RLS (only see your own family's data)
-- [ ] Create-family flow (generates invite code)
-- [ ] Join-by-invite-code flow
+- [x] `families` and `family_members` tables + RLS + `create_family` / `join_family` RPCs ([supabase/migrations/0002_init_families.sql](supabase/migrations/0002_init_families.sql))
+- [x] Onboarding: gate `(tabs)` behind "must belong to a family" check ([src/app/_layout.tsx](src/app/_layout.tsx))
+- [x] Create-family flow (generates invite code) ([src/app/(onboarding)/create-family.tsx](src/app/(onboarding)/create-family.tsx))
+- [x] Join-by-invite-code flow ([src/app/(onboarding)/join-family.tsx](src/app/(onboarding)/join-family.tsx))
 - [ ] Family member list with their upcoming events
-- [ ] Onboarding: gate `(tabs)` behind "must belong to a family" check
 
 ### Events
-- [ ] `events` table + RLS scoped to `family_id`
-- [ ] Create / edit / delete event (title, date, type, notes, recurring)
-- [ ] Events tab: upcoming feed sorted by nearest date
-- [ ] Home tab: next-30-days feed + quick-add button
+- [x] `events` table + RLS scoped to `family_id` ([supabase/migrations/0003_init_events.sql](supabase/migrations/0003_init_events.sql))
+- [x] Create / edit / delete event (title, date, type, notes, recurring) ([src/app/event-form.tsx](src/app/event-form.tsx))
+- [x] Events tab: upcoming feed sorted by nearest date ([src/app/(tabs)/events.tsx](src/app/(tabs)/events.tsx))
+- [x] Home tab: next-30-days feed + quick-add button ([src/app/(tabs)/index.tsx](src/app/(tabs)/index.tsx))
 
 ### Messaging
 - [ ] `messages` table + RLS scoped to `family_id`
@@ -59,9 +59,14 @@ Tracking progress against the original [spec](README.md). Check items off as you
 ### Notifications
 - [ ] `notifications` table + RLS
 - [ ] Register Expo push token on login → write to `profiles.expo_push_token`
-- [ ] In-app Notifications tab with read/unread state
+- [ ] Remove the Alerts tab; add a notification bell to the top-right of the Home screen that opens the Alerts/Notifications screen
+- [ ] Alerts/Notifications screen with read/unread state
 - [ ] Edge Function `supabase/functions/notify` — daily cron, queries upcoming events, sends via Expo Push API
 - [ ] Schedule the Edge Function (Supabase cron or external scheduler)
+
+### Wishlist
+- [ ] As a user, I want to be able to create a wishlist
+- [ ] As a user, I want to be able to view other family members' wishlists
 
 ### Styling
 - [ ] Add NativeWind (Tailwind for RN) per original spec — currently using StyleSheet
