@@ -1,6 +1,6 @@
 # Famfetti — TODOs
 
-Tracking progress against the original [spec](README.md). Check items off as you go.
+Tracking progress against [AGENTS.md](AGENTS.md) and the original [spec](README.md). Check items off as you go.
 
 ## Done
 
@@ -18,8 +18,8 @@ Tracking progress against the original [spec](README.md). Check items off as you
 ### Navigation
 - [x] Root layout with auth gate that redirects on session change ([src/app/_layout.tsx](src/app/_layout.tsx))
 - [x] `(auth)` route group ([src/app/(auth)/_layout.tsx](src/app/(auth)/_layout.tsx))
-- [x] `(tabs)` bottom-tab layout for Home, Events, Chat, Alerts, Settings ([src/app/(tabs)/_layout.tsx](src/app/(tabs)/_layout.tsx))
-- [x] Placeholder screens for all five tabs
+- [x] `(tabs)` bottom-tab layout for Home, Events, Alerts, Settings ([src/app/(tabs)/_layout.tsx](src/app/(tabs)/_layout.tsx))
+- [x] Placeholder screens for all four tabs
 
 ### Auth
 - [x] Email + password sign-in ([src/app/(auth)/sign-in.tsx](src/app/(auth)/sign-in.tsx))
@@ -33,8 +33,6 @@ Tracking progress against the original [spec](README.md). Check items off as you
 
 ### Profile
 - [x] Edit profile screen — name only ([src/app/profile.tsx](src/app/profile.tsx))
-- [ ] Avatar upload to Supabase Storage
-- [ ] Per-user `notify_days_before` preference UI
 
 ### Family groups
 - [x] `families` and `family_members` tables + RLS + `create_family` / `join_family` RPCs ([supabase/migrations/0002_init_families.sql](supabase/migrations/0002_init_families.sql))
@@ -49,24 +47,27 @@ Tracking progress against the original [spec](README.md). Check items off as you
 - [x] Events tab: upcoming feed sorted by nearest date ([src/app/(tabs)/events.tsx](src/app/(tabs)/events.tsx))
 - [x] Home tab: next-30-days feed + quick-add button ([src/app/(tabs)/index.tsx](src/app/(tabs)/index.tsx))
 
-### Messaging
-- [ ] `messages` table + RLS scoped to `family_id`
-- [ ] Chat tab UI (message list, input, send)
-- [ ] Realtime subscription via Supabase Realtime
-- [ ] `read_by[]` tracking + unread badge on Home tab
-- [ ] (Stretch) image messages via Supabase Storage
-
-### Notifications
+### Notification Agent
+_Sends push notifications when events are created or updated. Trigger: event created/updated in Supabase. Tech: Supabase Edge Functions + Expo Notifications._
 - [ ] `notifications` table + RLS
 - [ ] Register Expo push token on login → write to `profiles.expo_push_token`
-- [ ] Remove the Alerts tab; add a notification bell to the top-right of the Home screen that opens the Alerts/Notifications screen
-- [ ] Alerts/Notifications screen with read/unread state
-- [ ] Edge Function `supabase/functions/notify` — daily cron, queries upcoming events, sends via Expo Push API
+- [ ] Edge Function that fires on event create/update and sends via the Expo Push API
+- [ ] Retry failed notifications (3 attempts)
+
+### Reminder Agent
+_Sends reminder notifications for upcoming events. Trigger: scheduled check for events happening soon. Tech: Supabase Scheduled Functions. Fixed timing: 1 hour before event._
+- [ ] Edge Function `supabase/functions/notify` — queries events starting in ~1 hour, sends via Expo Push API
 - [ ] Schedule the Edge Function (Supabase cron or external scheduler)
 
-### Wishlist
-- [ ] As a user, I want to be able to create a wishlist
-- [ ] As a user, I want to be able to view other family members' wishlists
+### Invite Agent
+_Generates and validates invite codes for adding family members to groups. Tech: Supabase Edge Functions._
+- [x] Generate unique invite code (`generate_invite_code` + `create_family` RPC)
+- [x] Validate code and add member to family group (`join_family` RPC)
+- [ ] Expire codes after 7 days or after use
+
+### Alerts UI
+- [ ] Remove the Alerts tab; add a notification bell to the top-right of the Home screen that opens the Alerts/Notifications screen
+- [ ] Alerts/Notifications screen with read/unread state
 
 ### Styling
 - [ ] Add NativeWind (Tailwind for RN) per original spec — currently using StyleSheet

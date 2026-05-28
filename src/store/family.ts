@@ -6,7 +6,7 @@ type FamilyState = {
   // signed-in user, so we don't flash the tabs before sending them to onboarding.
   hasFamily: boolean | null;
   // v1 assumes one family per user. If the user is in multiple, this holds
-  // the first one returned. Scoped queries (events, messages) read from here.
+  // the first one returned. Scoped queries (events) read from here.
   activeFamilyId: string | null;
   setActiveFamily: (familyId: string) => void;
   setNoFamily: () => void;

@@ -1,9 +1,9 @@
 # Famfetti
 
-A family notification and messaging app built with [Expo](https://expo.dev) + [Supabase](https://supabase.com).
+A family notification app built with [Expo](https://expo.dev) + [Supabase](https://supabase.com).
 
 This commit scaffolds the foundation: Supabase client wiring, Expo Router navigation shell, and email/password auth.
-Features (events, chat, push notifications) are placeholders to be filled in.
+Features (events, push notifications) are placeholders to be filled in.
 
 ## Setup
 
@@ -51,7 +51,6 @@ src/
       _layout.tsx        Bottom tab nav
       index.tsx          Home
       events.tsx
-      chat.tsx
       notifications.tsx
       settings.tsx       Profile + sign out
   components/            Shared UI (themed text/view, etc.)
@@ -77,6 +76,5 @@ supabase/
 
 - Family groups (`families`, `family_members` tables and invite-code flow)
 - Events CRUD + upcoming-events feed
-- Realtime chat (`messages` table + subscription)
 - Expo push notifications + the `/functions/notify` Edge Function
 - NativeWind styling (currently uses StyleSheet + the template's themed components)
