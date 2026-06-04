@@ -7,6 +7,18 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 ## Overview
 Background services that handle notifications, event reminders, and family group management.
 
+## Development Principles
+
+When working on Famfetti tasks:
+- **Start simple**: Only build the most basic version of the requested feature
+- **One function at a time**: Add a single function/feature per task, not multiple
+- **Assume junior level**: Write clear code and explanations; don't assume prior knowledge
+- **Explain completed work**: Each completed task includes:
+  - How the new function works
+  - What it does and why
+  - Any edge cases handled
+- **Include tests**: Each task includes 1-2 suggested Cypress tests (can be more if needed)
+
 ## Agents
 
 ### Notification Agent
