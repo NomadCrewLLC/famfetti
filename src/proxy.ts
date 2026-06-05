@@ -4,7 +4,7 @@ import { updateSession } from '@/lib/supabase/middleware';
 
 const PUBLIC_PATHS = ['/sign-in', '/sign-up'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
   const isPublicPath = PUBLIC_PATHS.includes(request.nextUrl.pathname);
 
