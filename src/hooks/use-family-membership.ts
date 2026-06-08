@@ -1,6 +1,8 @@
+'use client';
+
 import { useEffect } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/auth';
 import { useFamilyStore } from '@/store/family';
 
