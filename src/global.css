@@ -45,6 +45,9 @@
   --spacing-four: 24px;
   --spacing-five: 32px;
   --spacing-six: 64px;
+
+  --radius-one: 4px;
+  --radius-two: 8px;
 }
 
 body {
