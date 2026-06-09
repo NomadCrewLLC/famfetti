@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git pull *)"
+    ]
+  },
   "enabledPlugins": {
     "expo@claude-plugins-official": true
   }
