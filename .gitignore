@@ -21,3 +21,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# local agent instructions
+commit-agent.md
