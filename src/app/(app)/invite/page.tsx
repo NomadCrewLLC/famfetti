@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { getFamily, type Family } from '@/lib/families';
+import { buildInviteLink } from '@/lib/invite';
 import { useFamilyStore } from '@/store/family';
 
 export default function InvitePage() {
@@ -10,6 +11,7 @@ export default function InvitePage() {
 
   const [family, setFamily] = useState<Family | null>(null);
   const [loading, setLoading] = useState(true);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeFamilyId) return;
@@ -44,6 +46,23 @@ export default function InvitePage() {
     window.alert('Copied invite code to clipboard.');
   };
 
+  // Wraps the same code in a sign-up URL, so the person we invite lands on a
+  // form that already knows the code instead of having to retype it.
+  const onGenerateLink = async () => {
+    if (!family) return;
+    const link = buildInviteLink(family.invite_code);
+    setInviteLink(link);
+
+    try {
+      await navigator.clipboard.writeText(link);
+      window.alert('Copied invite link to clipboard.');
+    } catch {
+      // Clipboard can be blocked (no HTTPS, denied permission). The link is
+      // rendered below the button either way, so it stays copyable by hand.
+      window.alert('Copy the link below to share it.');
+    }
+  };
+
   if (loading) {
     return (
       <main className="mx-auto max-w-[800px] px-four pt-four">
@@ -69,6 +88,20 @@ export default function InvitePage() {
       >
         Share invite code
       </button>
+
+      <button
+        type="button"
+        onClick={onGenerateLink}
+        className="mt-three w-full rounded-two border border-background-selected py-three text-center font-semibold text-text"
+      >
+        Generate link
+      </button>
+
+      {inviteLink && (
+        <p className="mt-three break-all text-center font-mono text-sm text-text-secondary">
+          {inviteLink}
+        </p>
+      )}
     </main>
   );
 }
