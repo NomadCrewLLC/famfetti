@@ -1,64 +1,74 @@
 # Famfetti — TODOs
 
-Tracking progress against [AGENTS.md](AGENTS.md) and the original [spec](README.md). Check items off as you go.
+A Next.js (App Router) + Supabase web app. Tracking progress against [AGENTS.md](AGENTS.md).
+Check items off as you go.
 
 ## Done
 
 ### Project setup
-- [x] Bootstrap Expo SDK 56 app (TypeScript, Expo Router, typed routes)
-- [x] Install Supabase JS client, AsyncStorage, URL polyfill, Zustand
-- [x] `.env.example` + `.env` gitignored
-- [x] Project README with setup steps
+- [x] Next.js App Router app (TypeScript, Turbopack root pinned in [next.config.ts](next.config.ts))
+- [x] Install `@supabase/supabase-js`, `@supabase/ssr`, `next-themes`, Zustand
+- [x] Tailwind CSS v4 via `@tailwindcss/postcss` ([postcss.config.mjs](postcss.config.mjs))
+- [x] `.env.example` + `.env` gitignored (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 
 ### Supabase
-- [x] Supabase client with `AsyncStorage` session persistence ([src/lib/supabase.ts](src/lib/supabase.ts))
-- [x] `AppState` listener to start/stop auto-refresh on foreground/background
+- [x] Browser client for Client Components ([src/lib/supabase/client.ts](src/lib/supabase/client.ts))
+- [x] Server client reading/writing cookies for Server Components ([src/lib/supabase/server.ts](src/lib/supabase/server.ts))
+- [x] Session refresh on every request ([src/lib/supabase/middleware.ts](src/lib/supabase/middleware.ts)) wired through [src/proxy.ts](src/proxy.ts)
 - [x] `profiles` table migration with RLS + `handle_new_user` trigger ([supabase/migrations/0001_init_profiles.sql](supabase/migrations/0001_init_profiles.sql))
 
-### Navigation
-- [x] Root layout with auth gate that redirects on session change ([src/app/_layout.tsx](src/app/_layout.tsx))
-- [x] `(auth)` route group ([src/app/(auth)/_layout.tsx](src/app/(auth)/_layout.tsx))
-- [x] `(tabs)` bottom-tab layout for Home, Events, Alerts, Settings ([src/app/(tabs)/_layout.tsx](src/app/(tabs)/_layout.tsx))
-- [x] Placeholder screens for all four tabs
+### Routing / layout
+- [x] Root layout with theme + auth providers ([src/app/layout.tsx](src/app/layout.tsx))
+- [x] `(auth)` route group ([src/app/(auth)/layout.tsx](<src/app/(auth)/layout.tsx>))
+- [x] `(onboarding)` route group ([src/app/(onboarding)/layout.tsx](<src/app/(onboarding)/layout.tsx>))
+- [x] `(app)` route group with server-side auth + family gate ([src/app/(app)/layout.tsx](<src/app/(app)/layout.tsx>))
+- [x] Top nav for Home, Events, Alerts, Settings ([src/components/nav-bar.tsx](src/components/nav-bar.tsx))
+- [x] Redirect unauthenticated users to `/sign-in` in the proxy ([src/proxy.ts](src/proxy.ts))
 
 ### Auth
-- [x] Email + password sign-in ([src/app/(auth)/sign-in.tsx](src/app/(auth)/sign-in.tsx))
-- [x] Email + password sign-up with name → `user_metadata` ([src/app/(auth)/sign-up.tsx](src/app/(auth)/sign-up.tsx))
-- [x] Persistent session (stays signed in across launches)
+- [x] Email + password sign-in ([src/app/(auth)/sign-in/page.tsx](<src/app/(auth)/sign-in/page.tsx>))
+- [x] Email + password sign-up with name → `user_metadata` ([src/app/(auth)/sign-up/page.tsx](<src/app/(auth)/sign-up/page.tsx>))
+- [x] Persistent session via cookies (survives reloads)
 - [x] Zustand auth store ([src/store/auth.ts](src/store/auth.ts))
 - [x] Session bootstrap hook subscribing to `onAuthStateChange` ([src/hooks/use-session.ts](src/hooks/use-session.ts))
-- [x] Sign-out wired in Settings ([src/app/(tabs)/settings.tsx](src/app/(tabs)/settings.tsx))
+- [x] Sign-out wired in Settings ([src/app/(app)/settings/page.tsx](<src/app/(app)/settings/page.tsx>))
 
 ## To do
 
 ### Profile
-- [x] Edit profile screen — name only ([src/app/profile.tsx](src/app/profile.tsx))
+- [x] Edit profile page — name only ([src/app/(app)/profile/page.tsx](<src/app/(app)/profile/page.tsx>))
 
 ### Family groups
 - [x] `families` and `family_members` tables + RLS + `create_family` / `join_family` RPCs ([supabase/migrations/0002_init_families.sql](supabase/migrations/0002_init_families.sql))
-- [x] Onboarding: gate `(tabs)` behind "must belong to a family" check ([src/app/_layout.tsx](src/app/_layout.tsx))
-- [x] Create-family flow (generates invite code) ([src/app/(onboarding)/create-family.tsx](src/app/(onboarding)/create-family.tsx))
-- [x] Join-by-invite-code flow ([src/app/(onboarding)/join-family.tsx](src/app/(onboarding)/join-family.tsx))
+- [x] Onboarding: gate `(app)` behind "must belong to a family" check ([src/app/(app)/layout.tsx](<src/app/(app)/layout.tsx>))
+- [x] Family membership bootstrap hook + store ([src/hooks/use-family-membership.ts](src/hooks/use-family-membership.ts), [src/store/family.ts](src/store/family.ts))
+- [x] Welcome / create / join onboarding pages ([src/app/(onboarding)/welcome/page.tsx](<src/app/(onboarding)/welcome/page.tsx>))
+- [x] Create-family flow (generates invite code) ([src/app/(onboarding)/create-family/page.tsx](<src/app/(onboarding)/create-family/page.tsx>))
+- [x] Join-by-invite-code flow ([src/app/(onboarding)/join-family/page.tsx](<src/app/(onboarding)/join-family/page.tsx>))
+- [x] Share-invite-code page ([src/app/(app)/invite/page.tsx](<src/app/(app)/invite/page.tsx>))
 - [ ] Family member list with their upcoming events
 
 ### Events
 - [x] `events` table + RLS scoped to `family_id` ([supabase/migrations/0003_init_events.sql](supabase/migrations/0003_init_events.sql))
-- [x] Create / edit / delete event (title, date, type, notes, recurring) ([src/app/event-form.tsx](src/app/event-form.tsx))
-- [x] Events tab: upcoming feed sorted by nearest date ([src/app/(tabs)/events.tsx](src/app/(tabs)/events.tsx))
-- [x] Home tab: next-30-days feed + quick-add button ([src/app/(tabs)/index.tsx](src/app/(tabs)/index.tsx))
+- [x] Event data layer + recurrence helpers ([src/lib/events.ts](src/lib/events.ts))
+- [x] Create / edit / delete event (title, date, type, notes, recurring) ([src/app/(app)/event-form/page.tsx](<src/app/(app)/event-form/page.tsx>))
+- [x] Events page: upcoming feed sorted by nearest date ([src/app/(app)/events/page.tsx](<src/app/(app)/events/page.tsx>))
+- [x] Home page: next-30-days feed + quick-add button ([src/app/(app)/page.tsx](<src/app/(app)/page.tsx>))
 
 ### Notification Agent
-_Sends push notifications when events are created or updated. Trigger: event created/updated in Supabase. Tech: Supabase Edge Functions + Expo Notifications._
+_Sends notifications when events are created or updated. Trigger: event created/updated in Supabase. Tech: Supabase Edge Functions + Web Push._
 - [x] `notifications` table + RLS + `mark_all_notifications_read()` RPC (built directly against remote pre-existing this todo list; reconciled into git via [supabase/migrations/20260731222340_remote_schema.sql](supabase/migrations/20260731222340_remote_schema.sql))
-- [ ] Register Expo push token on login → write to `profiles.expo_push_token`
-- [ ] Edge Function that fires on event create/update and sends via the Expo Push API
-- [ ] Retry failed notifications (3 attempts)
+- [ ] Migration to replace the mobile-era push columns with web-push equivalents: `profiles.expo_push_token` → a `push_subscriptions` table (endpoint + p256dh + auth keys, one row per browser), and `notifications.expo_ticket_id` / `expo_error` → provider-agnostic `delivery_id` / `delivery_error`
+- [ ] Service worker (`public/sw.js`) handling `push` and `notificationclick`
+- [ ] VAPID keys in env; client-side "Enable notifications" prompt that calls `Notification.requestPermission()` + `PushManager.subscribe()` and saves the subscription
+- [ ] Edge Function that fires on event create/update and sends via Web Push
+- [ ] Retry failed notifications (3 attempts); prune subscriptions the browser has revoked (410/404)
 
 ### Reminder Agent
 _Sends reminder notifications for upcoming events. Trigger: scheduled check for events happening soon. Tech: Supabase Scheduled Functions. Fixed timing: 1 hour before event._
 - [x] `pg_cron` + `pg_net` extensions installed (via the same reconciliation migration above), ready for scheduling
-- [ ] Edge Function `supabase/functions/notify` — queries events starting in ~1 hour, sends via Expo Push API
-- [ ] Schedule the Edge Function (Supabase cron or external scheduler)
+- [ ] Edge Function `supabase/functions/notify` — queries events starting in ~1 hour, sends via Web Push
+- [ ] Schedule the Edge Function (`pg_cron` calling it through `pg_net`, or an external scheduler)
 
 ### Invite Agent
 _Generates and validates invite codes for adding family members to groups. Tech: Supabase Edge Functions._
@@ -74,22 +84,32 @@ _New flow: when creating a family, the creator adds members by email or phone. E
 - [ ] Wire create-family form submit: call `create_family`, then `create_family_invite` once per entered contact
 - [ ] Edge Function `send-family-invite`: sends an email with the invite code + join link (start with email only)
 - [ ] Call `send-family-invite` after each invite row is created (from the client, or a DB webhook on insert)
-- [ ] Public accept-invite page (e.g. `/join-family/[code]`) that looks up the invite, shows the family name, and links to sign-up with the code attached
+- [ ] Public accept-invite route (e.g. `/join-family/[code]`) that looks up the invite, shows the family name, and links to sign-up with the code attached — needs to be reachable while signed out, so add it to `PUBLIC_PATHS` in [src/proxy.ts](src/proxy.ts)
 - [ ] Sign-up flow: carry the invite code through as a query param; after account creation, auto-call `join_family` with that code instead of asking the user to type it in
 - [ ] Mark the invite row `accepted` (+ `accepted_by`, `accepted_at`) once the invited user successfully joins
 - [ ] SMS invites: add phone-based sending via a provider like Twilio (separate from email since it needs a paid account)
 
 ### Alerts UI
-- [ ] Remove the Alerts tab; add a notification bell to the top-right of the Home screen that opens the Alerts/Notifications screen
-- [ ] Alerts/Notifications screen with read/unread state
+- [ ] Remove the Alerts link from the nav bar; add a notification bell to the top-right of the Home page that links to `/notifications`
+- [ ] Build out `/notifications` with real data and read/unread state — currently a static placeholder ([src/app/(app)/notifications/page.tsx](<src/app/(app)/notifications/page.tsx>))
+- [ ] Unread badge on the bell (count from `notifications` where `read_at is null`)
+- [ ] "Mark all read" wired to the existing `mark_all_notifications_read()` RPC
+
+### Messaging
+_The `messages` table exists but nothing in the app reads or writes it yet._
+- [x] `messages` table + `read_by` trigger + `mark_family_messages_read` RPC ([supabase/migrations/0004_init_messages.sql](supabase/migrations/0004_init_messages.sql))
+- [ ] Family chat page + data layer (`src/lib/messages.ts`), or drop the migration if messaging is out of scope
 
 ### Styling
-- [ ] Add NativeWind (Tailwind for RN) per original spec — currently using StyleSheet
-- [ ] Replace inline styles in auth + tab screens once NativeWind is in
+- [x] Tailwind v4 with design tokens + dark mode variables ([src/global.css](src/global.css))
+- [x] Theme switching via `next-themes` ([src/components/theme-provider.tsx](src/components/theme-provider.tsx))
+- [ ] Add a theme toggle in Settings — the provider is mounted but nothing changes the theme
+- [ ] Replace `window.alert` error handling with inline form errors / toasts across auth, onboarding, profile, and event-form
+- [ ] Loading and empty states as shared components instead of repeated `Loading…` paragraphs
 
 ### Dev / QA
 - [ ] Seed script: one test family, 3 members, sample events
-- [ ] Verify app boots on iOS simulator
-- [ ] Verify app boots on Android emulator
-- [ ] Lint passes (`npx expo lint`)
-- [ ] Consider Jest setup for hooks/utils (skipped during scaffold)
+- [ ] Verify the app boots with `npm run dev` and the full sign-up → create family → add event flow works
+- [ ] Verify responsive layout at mobile widths
+- [ ] Lint passes (`npm run lint`)
+- [ ] Cypress setup + specs for the auth and create-family flows (per [AGENTS.md](AGENTS.md))
