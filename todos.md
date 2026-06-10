@@ -63,7 +63,20 @@ _Sends reminder notifications for upcoming events. Trigger: scheduled check for 
 _Generates and validates invite codes for adding family members to groups. Tech: Supabase Edge Functions._
 - [x] Generate unique invite code (`generate_invite_code` + `create_family` RPC)
 - [x] Validate code and add member to family group (`join_family` RPC)
-- [ ] Expire codes after 7 days or after use
+- [ ] Expire codes after 7 days or after use (extend to cover `family_invites` below too)
+
+#### Targeted invites (invite by email/phone during family creation)
+_New flow: when creating a family, the creator adds members by email or phone. Each invited person gets their own code, sent directly to them, that carries them from account creation straight into the family._
+- [x] `family_invites` table migration: `family_id`, `invited_by`, `contact_method` (email/phone), `contact_value`, `invite_code`, `status` (pending/accepted/expired), `expires_at`, RLS scoped to family members ([supabase/migrations/0005_init_family_invites.sql](supabase/migrations/0005_init_family_invites.sql))
+- [ ] `create_family_invite(family_id, contact_method, contact_value)` RPC — creates one invite row + code, returns it
+- [ ] Create-family form: add a repeatable "invite a member" input (email or phone) below the family name field — client-side list only, no sending yet
+- [ ] Wire create-family form submit: call `create_family`, then `create_family_invite` once per entered contact
+- [ ] Edge Function `send-family-invite`: sends an email with the invite code + join link (start with email only)
+- [ ] Call `send-family-invite` after each invite row is created (from the client, or a DB webhook on insert)
+- [ ] Public accept-invite page (e.g. `/join-family/[code]`) that looks up the invite, shows the family name, and links to sign-up with the code attached
+- [ ] Sign-up flow: carry the invite code through as a query param; after account creation, auto-call `join_family` with that code instead of asking the user to type it in
+- [ ] Mark the invite row `accepted` (+ `accepted_by`, `accepted_at`) once the invited user successfully joins
+- [ ] SMS invites: add phone-based sending via a provider like Twilio (separate from email since it needs a paid account)
 
 ### Alerts UI
 - [ ] Remove the Alerts tab; add a notification bell to the top-right of the Home screen that opens the Alerts/Notifications screen
