@@ -49,13 +49,14 @@ Tracking progress against [AGENTS.md](AGENTS.md) and the original [spec](README.
 
 ### Notification Agent
 _Sends push notifications when events are created or updated. Trigger: event created/updated in Supabase. Tech: Supabase Edge Functions + Expo Notifications._
-- [ ] `notifications` table + RLS
+- [x] `notifications` table + RLS + `mark_all_notifications_read()` RPC (built directly against remote pre-existing this todo list; reconciled into git via [supabase/migrations/20260731222340_remote_schema.sql](supabase/migrations/20260731222340_remote_schema.sql))
 - [ ] Register Expo push token on login → write to `profiles.expo_push_token`
 - [ ] Edge Function that fires on event create/update and sends via the Expo Push API
 - [ ] Retry failed notifications (3 attempts)
 
 ### Reminder Agent
 _Sends reminder notifications for upcoming events. Trigger: scheduled check for events happening soon. Tech: Supabase Scheduled Functions. Fixed timing: 1 hour before event._
+- [x] `pg_cron` + `pg_net` extensions installed (via the same reconciliation migration above), ready for scheduling
 - [ ] Edge Function `supabase/functions/notify` — queries events starting in ~1 hour, sends via Expo Push API
 - [ ] Schedule the Edge Function (Supabase cron or external scheduler)
 

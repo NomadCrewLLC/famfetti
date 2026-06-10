@@ -4,7 +4,13 @@
       "Bash(git checkout *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(supabase db *)",
+      "Bash(open -a Docker)",
+      "Bash(docker info *)",
+      "Bash(supabase --help)",
+      "Bash(supabase migration *)",
+      "Bash(supabase projects *)"
     ]
   },
   "enabledPlugins": {
