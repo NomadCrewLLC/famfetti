@@ -82,7 +82,7 @@ _Shipped flow: on [/invite](<src/app/(app)/invite/page.tsx>), "Generate link" wr
 - [x] "Generate link" button on the invite page ([src/app/(app)/invite/page.tsx](<src/app/(app)/invite/page.tsx>))
 - [x] Sign-up reads `?invite=` and pre-fills + disables the code field; auto-calls `join_family` after account creation ([src/app/(auth)/sign-up/page.tsx](<src/app/(auth)/sign-up/page.tsx>))
 - [x] Invite code is required at sign-up, with a `?new=1` escape hatch for whoever is starting a brand-new family (otherwise the first user could never sign up)
-- [x] Codes parked in `localStorage` when email confirmation blocks the immediate join, redeemed on [welcome](<src/app/(onboarding)/welcome/page.tsx>)
+- [x] Codes parked in `localStorage` when email confirmation blocks the immediate join, redeemed on [welcome](<src/app/(onboarding)/welcome/page.tsx>) — **now dormant**: email confirmation is off on the hosted project, so `signUp` always returns a session and the join happens inline. Kept as a fallback; see [auth-flow.md](auth-flow.md) before touching it
 - [ ] An already-signed-in user who opens an invite link gets bounced off `/sign-up` by [src/proxy.ts](src/proxy.ts) and loses the code — they have to paste it into `/join-family` by hand
 - [ ] A wrong hand-typed code still creates the account before the join fails (lands on `/welcome`); fixing it properly needs an anonymous code-validation RPC
 
