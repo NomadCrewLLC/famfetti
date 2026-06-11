@@ -12,7 +12,9 @@
       "Bash(supabase migration *)",
       "Bash(supabase projects *)",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)"
     ]
   },
   "enabledPlugins": {

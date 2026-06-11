@@ -24,7 +24,7 @@ Split the staged work into 2–3 logical commits (group related files together; 
 
 For each commit:
 - Choose a datetime **after** the previous date in the chain. For the first commit, that's `REF_DATE`; for each subsequent commit, it's the date you set on the commit before it (on this same branch).
-- The chosen time must fall **between 09:00 and 16:00** local time. If the previous date leaves no room before 16:00 that day, roll forward to the next day and pick a time in the 09:00–16:00 window.
+- The chosen time must fall **between 09:00 and 16:00** local time and between **Monday to Friday**. If the previous date leaves no room before 16:00 that day, roll forward to the next weekday (e.g. if previous date is on a Friday, roll forward to Monday) and pick a time in the 09:00–16:00 window.
 - Space the commits realistically (e.g., 20 minutes to a few hours apart, or across days).
 - Randomize the time down to the second — minutes and seconds should look organic, never round numbers like `:00` or `:30:00`. Good: `09:39:13`, `13:07:41`. Bad: `10:00:00`, `14:30:00`.
 - Use full ISO 8601 format with timezone offset, e.g. `2026-07-29T10:42:37-04:00`.
