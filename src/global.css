@@ -1,56 +1,46 @@
-@import 'tailwindcss';
+/*
+ * Pins Mantine's CSS variables to the exact palette the app used before the
+ * Tailwind removal.
+ *
+ * These deliberately do NOT use the preset's light-dark() helper. That helper
+ * expands to `[data-mantine-color-scheme="dark"] <selector>` — a descendant
+ * combinator, which never matches when the selector is :root, because the
+ * attribute lives on <html> and <html> *is* :root. Mantine sets its own
+ * variables with the compound `:root[data-mantine-color-scheme="…"]` selector,
+ * so we match it here.
+ */
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-  --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
-
-  --color-text: #000000;
-  --color-background: #ffffff;
+:root[data-mantine-color-scheme='light'] {
   --color-background-element: #f0f0f3;
   --color-background-selected: #e0e1e6;
-  --color-text-secondary: #60646c;
+
+  /* Was --color-background / --color-text: pure #fff/#000, inverted in dark. */
+  --mantine-color-body: #ffffff;
+  --mantine-color-text: #000000;
+  --mantine-color-dimmed: #60646c;
+
+  /* Monochrome buttons: black filled on light, white filled on dark. */
+  --mantine-primary-color-filled: #000000;
+  --mantine-primary-color-filled-hover: #222222;
+  --mantine-primary-color-contrast: #ffffff;
 }
 
-.dark {
-  --color-text: #ffffff;
-  --color-background: #000000;
+:root[data-mantine-color-scheme='dark'] {
   --color-background-element: #212225;
   --color-background-selected: #2e3135;
-  --color-text-secondary: #b0b4ba;
+
+  --mantine-color-body: #000000;
+  --mantine-color-text: #ffffff;
+  --mantine-color-dimmed: #b0b4ba;
+
+  --mantine-primary-color-filled: #ffffff;
+  --mantine-primary-color-filled-hover: #e5e5e5;
+  --mantine-primary-color-contrast: #000000;
 }
 
-@theme inline {
-  --color-text: var(--color-text);
-  --color-background: var(--color-background);
-  --color-background-element: var(--color-background-element);
-  --color-background-selected: var(--color-background-selected);
-  --color-text-secondary: var(--color-text-secondary);
+:root {
+  --mantine-color-default-border: var(--color-background-selected);
 
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
-  --font-rounded: var(--font-rounded);
-  --font-serif: var(--font-serif);
-
-  --spacing-half: 2px;
-  --spacing-one: 4px;
-  --spacing-two: 8px;
-  --spacing-three: 16px;
-  --spacing-four: 24px;
-  --spacing-five: 32px;
-  --spacing-six: 64px;
-
-  --radius-one: 4px;
-  --radius-two: 8px;
-}
-
-body {
-  background-color: var(--color-background);
-  color: var(--color-text);
+  /* Links read as body text, matching the old text-text + underline styling. */
+  --mantine-color-anchor: var(--mantine-color-text);
 }

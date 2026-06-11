@@ -9,21 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mantine/core": "^9.5.1",
+    "@mantine/hooks": "^9.5.1",
+    "@mantine/notifications": "^9.5.1",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "^2.106.1",
     "next": "latest",
-    "next-themes": "latest",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "zustand": "^5.0.13"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "latest",
     "@types/react": "^19.2.2",
     "@types/react-dom": "latest",
     "postcss": "^8.5.23",
-    "tailwindcss": "latest",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
     "typescript": "^6.0.3"
   }
 }
