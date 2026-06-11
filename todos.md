@@ -76,18 +76,22 @@ _Generates and validates invite codes for adding family members to groups. Tech:
 - [x] Validate code and add member to family group (`join_family` RPC)
 - [ ] Expire codes after 7 days or after use (extend to cover `family_invites` below too)
 
-#### Targeted invites (invite by email/phone during family creation)
-_New flow: when creating a family, the creator adds members by email or phone. Each invited person gets their own code, sent directly to them, that carries them from account creation straight into the family._
-- [x] `family_invites` table migration: `family_id`, `invited_by`, `contact_method` (email/phone), `contact_value`, `invite_code`, `status` (pending/accepted/expired), `expires_at`, RLS scoped to family members ([supabase/migrations/0005_init_family_invites.sql](supabase/migrations/0005_init_family_invites.sql))
-- [ ] `create_family_invite(family_id, contact_method, contact_value)` RPC — creates one invite row + code, returns it
-- [ ] Create-family form: add a repeatable "invite a member" input (email or phone) below the family name field — client-side list only, no sending yet
-- [ ] Wire create-family form submit: call `create_family`, then `create_family_invite` once per entered contact
-- [ ] Edge Function `send-family-invite`: sends an email with the invite code + join link (start with email only)
-- [ ] Call `send-family-invite` after each invite row is created (from the client, or a DB webhook on insert)
-- [ ] Public accept-invite route (e.g. `/join-family/[code]`) that looks up the invite, shows the family name, and links to sign-up with the code attached — needs to be reachable while signed out, so add it to `PUBLIC_PATHS` in [src/proxy.ts](src/proxy.ts)
-- [ ] Sign-up flow: carry the invite code through as a query param; after account creation, auto-call `join_family` with that code instead of asking the user to type it in
-- [ ] Mark the invite row `accepted` (+ `accepted_by`, `accepted_at`) once the invited user successfully joins
-- [ ] SMS invites: add phone-based sending via a provider like Twilio (separate from email since it needs a paid account)
+#### Invite links (copy/paste a sign-up URL)
+_Shipped flow: on [/invite](<src/app/(app)/invite/page.tsx>), "Generate link" wraps the family's existing `invite_code` in a sign-up URL (`/sign-up?invite=CODE`) and copies it. The recipient opens it, the code is pre-filled and locked, and they join the moment their account exists. Links are reusable and never expire — same semantics as the code itself — so this needed no new SQL._
+- [x] `buildInviteLink` + pending-code helpers ([src/lib/invite.ts](src/lib/invite.ts))
+- [x] "Generate link" button on the invite page ([src/app/(app)/invite/page.tsx](<src/app/(app)/invite/page.tsx>))
+- [x] Sign-up reads `?invite=` and pre-fills + disables the code field; auto-calls `join_family` after account creation ([src/app/(auth)/sign-up/page.tsx](<src/app/(auth)/sign-up/page.tsx>))
+- [x] Invite code is required at sign-up, with a `?new=1` escape hatch for whoever is starting a brand-new family (otherwise the first user could never sign up)
+- [x] Codes parked in `localStorage` when email confirmation blocks the immediate join, redeemed on [welcome](<src/app/(onboarding)/welcome/page.tsx>)
+- [ ] An already-signed-in user who opens an invite link gets bounced off `/sign-up` by [src/proxy.ts](src/proxy.ts) and loses the code — they have to paste it into `/join-family` by hand
+- [ ] A wrong hand-typed code still creates the account before the join fails (lands on `/welcome`); fixing it properly needs an anonymous code-validation RPC
+
+#### Deferred: emailed / targeted invites
+_The `family_invites` table exists ([supabase/migrations/0005_init_family_invites.sql](supabase/migrations/0005_init_family_invites.sql)) but nothing reads or writes it — the link flow above uses `families.invite_code` instead. Everything below is what it would take to send invites directly to a person rather than handing over a link._
+- [ ] `create_family_invite(family_id, contact_method, contact_value)` RPC — one invite row + code per invited person
+- [ ] Edge Function `send-family-invite`: emails the invite code + join link
+- [ ] Mark the invite row `accepted` (+ `accepted_by`, `accepted_at`) once the invited user joins; expire codes after 7 days or after use
+- [ ] SMS invites via a provider like Twilio (needs a paid account)
 
 ### Alerts UI
 - [ ] Remove the Alerts link from the nav bar; add a notification bell to the top-right of the Home page that links to `/notifications`

@@ -10,7 +10,9 @@
       "Bash(docker info *)",
       "Bash(supabase --help)",
       "Bash(supabase migration *)",
-      "Bash(supabase projects *)"
+      "Bash(supabase projects *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)"
     ]
   },
   "enabledPlugins": {
