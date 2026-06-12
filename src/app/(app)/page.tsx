@@ -1,26 +1,15 @@
 'use client';
 
+import { Alert, Button, Container, Group, Stack, Text, Title } from '@mantine/core';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
+import { EmptyState } from '@/components/empty-state';
+import { EventList } from '@/components/event-list';
+import { LoadingState } from '@/components/loading-state';
 import { listFamilyEvents, upcomingFeed, type FamilyEvent } from '@/lib/events';
 import { useAuthStore } from '@/store/auth';
 import { useFamilyStore } from '@/store/family';
-
-const TYPE_LABEL: Record<FamilyEvent['type'], string> = {
-  birthday: 'Birthday',
-  anniversary: 'Anniversary',
-  holiday: 'Holiday',
-  other: 'Event',
-};
-
-const DATE_FMT = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
-
-function daysLabel(days: number): string {
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Tomorrow';
-  return `in ${days} days`;
-}
 
 const HORIZON_DAYS = 30;
 
@@ -57,50 +46,34 @@ export default function HomePage() {
   const feed = upcomingFeed(events).filter((e) => e.days <= HORIZON_DAYS);
 
   return (
-    <main className="mx-auto max-w-[800px] px-four pb-six pt-four">
-      <div className="flex items-center gap-three pb-three">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">Hi, {greeting}</h1>
-          <p className="text-text-secondary">Next {HORIZON_DAYS} days</p>
-        </div>
-        <Link
-          href="/event-form"
-          className="rounded-two bg-text px-three py-two font-semibold text-background"
-        >
+    <Container size={800} px="lg" pt="lg" pb={64}>
+      <Group align="center" gap="md" pb="md" wrap="nowrap">
+        <Stack gap={0} flex={1}>
+          <Title order={1} fz={24}>
+            Hi, {greeting}
+          </Title>
+          <Text c="dimmed">Next {HORIZON_DAYS} days</Text>
+        </Stack>
+        <Button component={Link} href="/event-form">
           + Add
-        </Link>
-      </div>
+        </Button>
+      </Group>
+
+      {error && (
+        <Alert color="red" mb="md" title="Could not load events">
+          {error}
+        </Alert>
+      )}
 
       {loading ? (
-        <p className="text-text-secondary">Loading…</p>
+        <LoadingState />
       ) : feed.length === 0 ? (
-        <p className="py-six text-center text-text-secondary">
-          {error ?? `Nothing in the next ${HORIZON_DAYS} days. Tap "+ Add" to create an event.`}
-        </p>
+        <EmptyState
+          message={`Nothing in the next ${HORIZON_DAYS} days. Tap "+ Add" to create an event.`}
+        />
       ) : (
-        <ul className="flex flex-col gap-two">
-          {feed.map((item) => (
-            <li key={item.event.id}>
-              <Link
-                href={`/event-form?id=${item.event.id}`}
-                className="flex items-center justify-between gap-three rounded-two bg-background-element px-three py-three"
-              >
-                <div className="flex flex-col gap-half">
-                  <span>{item.event.title}</span>
-                  <span className="text-sm text-text-secondary">
-                    {TYPE_LABEL[item.event.type]}
-                    {item.event.recurring ? ' · yearly' : ''}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end gap-half">
-                  <span className="font-semibold">{DATE_FMT.format(item.next)}</span>
-                  <span className="text-sm text-text-secondary">{daysLabel(item.days)}</span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <EventList items={feed} />
       )}
-    </main>
+    </Container>
   );
 }

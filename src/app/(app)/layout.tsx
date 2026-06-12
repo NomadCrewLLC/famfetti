@@ -1,3 +1,4 @@
+import { Box } from '@mantine/core';
 import { redirect } from 'next/navigation';
 
 import { NavBar } from '@/components/nav-bar';
@@ -21,9 +22,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!membership?.family_id) redirect('/welcome');
 
   return (
-    <div className="min-h-screen bg-background text-text">
+    <Box mih="100vh">
       <NavBar />
       {children}
-    </div>
+    </Box>
   );
 }

@@ -105,15 +105,21 @@ _The `messages` table exists but nothing in the app reads or writes it yet._
 - [ ] Family chat page + data layer (`src/lib/messages.ts`), or drop the migration if messaging is out of scope
 
 ### Styling
-- [x] Tailwind v4 with design tokens + dark mode variables ([src/global.css](src/global.css))
-- [x] Theme switching via `next-themes` ([src/components/theme-provider.tsx](src/components/theme-provider.tsx))
-- [ ] Add a theme toggle in Settings — the provider is mounted but nothing changes the theme
-- [ ] Replace `window.alert` error handling with inline form errors / toasts across auth, onboarding, profile, and event-form
-- [ ] Loading and empty states as shared components instead of repeated `Loading…` paragraphs
+_UI kit is **Mantine 9**. Tailwind v4 and `next-themes` were removed — Mantine's
+`ColorSchemeScript` + `useMantineColorScheme` replace next-themes, and the old design
+tokens now live in [src/theme.ts](src/theme.ts) with the palette pinned in
+[src/global.css](src/global.css). The old 4px spacing scale maps onto Mantine's
+`xs`–`xl`; `half` (2px) and `six` (64px) are written as literals at the few call sites
+that used them._
+- [x] Mantine set up: `MantineProvider` + `ColorSchemeScript` ([src/app/layout.tsx](<src/app/layout.tsx>)), `postcss-preset-mantine` ([postcss.config.mjs](postcss.config.mjs)), theme ([src/theme.ts](src/theme.ts))
+- [x] Theme toggle in Settings — Light / Dark / Auto ([src/app/(app)/settings/page.tsx](<src/app/(app)/settings/page.tsx>))
+- [x] Replaced `window.alert` / `window.confirm` with inline field errors, `@mantine/notifications` toasts, and blocking `Modal`s for the two cases that need to block (the create-family invite-code reveal, and the event delete confirm)
+- [x] Shared [LoadingState](src/components/loading-state.tsx) / [EmptyState](src/components/empty-state.tsx) components, plus [EventList](src/components/event-list.tsx) extracted from the duplicated home/events feed markup
+- [ ] `npm run lint` is broken — `next lint` was removed in Next 16 and the repo has no ESLint config; needs `eslint` + `eslint-config-next` wired up (see the Dev/QA item below)
 
 ### Dev / QA
 - [ ] Seed script: one test family, 3 members, sample events
 - [ ] Verify the app boots with `npm run dev` and the full sign-up → create family → add event flow works
 - [ ] Verify responsive layout at mobile widths
-- [ ] Lint passes (`npm run lint`)
+- [ ] Lint passes — the `lint` script still calls `next lint`, which Next 16 removed; replace it with `eslint` + `eslint-config-next` and a flat config
 - [ ] Cypress setup + specs for the auth and create-family flows (per [AGENTS.md](AGENTS.md))

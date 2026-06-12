@@ -1,8 +1,11 @@
 'use client';
 
+import { Avatar, Button, Container, Input, Stack, Text, TextInput } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { LoadingState } from '@/components/loading-state';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/auth';
 
@@ -11,6 +14,7 @@ export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
 
   const [name, setName] = useState('');
+  const [nameError, setNameError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -28,7 +32,7 @@ export default function ProfilePage() {
       if (cancelled) return;
 
       if (error) {
-        window.alert(error.message);
+        notifications.show({ color: 'red', title: 'Could not load profile', message: error.message });
       } else {
         setName(data?.name ?? '');
       }
@@ -45,7 +49,7 @@ export default function ProfilePage() {
     if (!user) return;
     const trimmed = name.trim();
     if (!trimmed) {
-      window.alert('Please enter a name.');
+      setNameError('Please enter a name.');
       return;
     }
 
@@ -57,7 +61,7 @@ export default function ProfilePage() {
     setSaving(false);
 
     if (error) {
-      window.alert(error.message);
+      notifications.show({ color: 'red', title: 'Could not save profile', message: error.message });
       return;
     }
     router.back();
@@ -67,47 +71,49 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-[800px] px-four pt-four">
-        <p className="text-text-secondary">Loading…</p>
-      </main>
+      <Container size={800} px="lg" pt="lg">
+        <LoadingState />
+      </Container>
     );
   }
 
   return (
-    <main className="mx-auto max-w-[800px] px-four pt-four">
-      <form onSubmit={onSave} className="flex flex-col gap-four">
-        <div className="flex flex-col items-center gap-two">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-background-element text-2xl font-bold">
-            {initial}
-          </div>
-          <span className="text-sm text-text-secondary">Avatar upload coming soon</span>
-        </div>
+    <Container size={800} px="lg" pt="lg">
+      <form onSubmit={onSave}>
+        <Stack gap="lg">
+          <Stack align="center" gap="sm">
+            <Avatar size={96} radius="xl" color="gray">
+              <Text fz={24} fw={700}>
+                {initial}
+              </Text>
+            </Avatar>
+            <Text size="sm" c="dimmed">
+              Avatar upload coming soon
+            </Text>
+          </Stack>
 
-        <div className="flex flex-col gap-one">
-          <span className="text-sm font-semibold text-text-secondary">Name</span>
-          <input
-            type="text"
+          <TextInput
+            label="Name"
             placeholder="Your name"
+            size="md"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            error={nameError}
+            onChange={(e) => {
+              setName(e.currentTarget.value);
+              setNameError(null);
+            }}
             disabled={saving}
-            className="rounded-two border border-background-selected px-three py-three text-base"
           />
-        </div>
 
-        <div className="flex flex-col gap-one">
-          <span className="text-sm font-semibold text-text-secondary">Email</span>
-          <span>{user?.email ?? '—'}</span>
-        </div>
+          <Input.Wrapper label="Email">
+            <Text>{user?.email ?? '—'}</Text>
+          </Input.Wrapper>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="mt-two rounded-two bg-text py-three text-center font-semibold text-background disabled:opacity-60"
-        >
-          {saving ? 'Saving…' : 'Save'}
-        </button>
+          <Button type="submit" size="md" mt="sm" loading={saving}>
+            Save
+          </Button>
+        </Stack>
       </form>
-    </main>
+    </Container>
   );
 }

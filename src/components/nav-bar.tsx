@@ -1,5 +1,6 @@
 'use client';
 
+import { Anchor, Group } from '@mantine/core';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -14,19 +15,29 @@ export function NavBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center justify-center gap-four border-b border-background-selected bg-background px-four py-three">
+    <Group
+      component="nav"
+      justify="center"
+      gap="lg"
+      px="lg"
+      py="md"
+      style={{ borderBottom: '1px solid var(--color-background-selected)' }}
+    >
       {LINKS.map((link) => {
         const active = pathname === link.href;
         return (
-          <Link
+          <Anchor
             key={link.href}
+            component={Link}
             href={link.href}
-            className={active ? 'font-semibold text-text' : 'text-text-secondary'}
+            underline="never"
+            fw={active ? 600 : 400}
+            c={active ? undefined : 'dimmed'}
           >
             {link.label}
-          </Link>
+          </Anchor>
         );
       })}
-    </nav>
+    </Group>
   );
 }

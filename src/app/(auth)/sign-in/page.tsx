@@ -1,5 +1,7 @@
 'use client';
 
+import { Anchor, Button, Center, Group, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -10,21 +12,24 @@ export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      window.alert('Email and password are required.');
-      return;
-    }
+
+    const nextErrors: typeof errors = {};
+    if (!email) nextErrors.email = 'Email is required.';
+    if (!password) nextErrors.password = 'Password is required.';
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
     setSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
 
     if (error) {
-      window.alert(error.message);
+      notifications.show({ color: 'red', title: 'Could not sign in', message: error.message });
       return;
     }
 
@@ -32,49 +37,58 @@ export default function SignInPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-four py-six text-text">
-      <div className="w-full max-w-sm">
-        <h1 className="text-center text-3xl font-bold">Famfetti</h1>
-        <p className="mt-one text-center text-text-secondary">
+    <Center mih="100vh" px="lg" py={64}>
+      <Stack w="100%" maw={400} gap={0}>
+        <Title order={1} fz={30} ta="center">
+          Famfetti
+        </Title>
+        <Text c="dimmed" ta="center" mt="xs">
           Sign in to keep up with your family.
-        </p>
+        </Text>
 
-        <form onSubmit={onSubmit} className="mt-four flex flex-col gap-three">
-          <input
-            type="email"
-            placeholder="Email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={submitting}
-            className="rounded-two border border-background-selected px-three py-three text-base"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={submitting}
-            className="rounded-two border border-background-selected px-three py-three text-base"
-          />
+        <form onSubmit={onSubmit}>
+          <Stack gap="md" mt="lg">
+            <TextInput
+              type="email"
+              placeholder="Email"
+              autoComplete="email"
+              size="md"
+              value={email}
+              error={errors.email}
+              onChange={(e) => {
+                setEmail(e.currentTarget.value);
+                setErrors((prev) => ({ ...prev, email: undefined }));
+              }}
+              disabled={submitting}
+            />
+            <PasswordInput
+              placeholder="Password"
+              autoComplete="current-password"
+              size="md"
+              value={password}
+              error={errors.password}
+              onChange={(e) => {
+                setPassword(e.currentTarget.value);
+                setErrors((prev) => ({ ...prev, password: undefined }));
+              }}
+              disabled={submitting}
+            />
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-two bg-text py-three text-center font-semibold text-background disabled:opacity-60"
-          >
-            {submitting ? 'Signing in…' : 'Sign in'}
-          </button>
+            <Button type="submit" size="md" loading={submitting}>
+              Sign in
+            </Button>
 
-          <div className="flex items-center justify-center gap-two text-sm text-text-secondary">
-            <span>No account yet?</span>
-            <Link href="/sign-up" replace className="font-semibold text-text underline">
-              Create one
-            </Link>
-          </div>
+            <Group gap="xs" justify="center">
+              <Text size="sm" c="dimmed">
+                No account yet?
+              </Text>
+              <Anchor component={Link} href="/sign-up" replace size="sm" fw={600} underline="always">
+                Create one
+              </Anchor>
+            </Group>
+          </Stack>
         </form>
-      </div>
-    </main>
+      </Stack>
+    </Center>
   );
 }

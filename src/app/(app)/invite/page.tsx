@@ -1,7 +1,10 @@
 'use client';
 
+import { Button, Container, Paper, Stack, Text } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useEffect, useState } from 'react';
 
+import { LoadingState } from '@/components/loading-state';
 import { getFamily, type Family } from '@/lib/families';
 import { buildInviteLink } from '@/lib/invite';
 import { useFamilyStore } from '@/store/family';
@@ -22,7 +25,13 @@ export default function InvitePage() {
         const data = await getFamily(activeFamilyId);
         if (!cancelled) setFamily(data);
       } catch (e) {
-        if (!cancelled) window.alert(e instanceof Error ? e.message : 'Could not load invite code.');
+        if (!cancelled) {
+          notifications.show({
+            color: 'red',
+            title: 'Could not load invite code',
+            message: e instanceof Error ? e.message : 'Could not load invite code.',
+          });
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -43,7 +52,7 @@ export default function InvitePage() {
     }
 
     await navigator.clipboard.writeText(family.invite_code);
-    window.alert('Copied invite code to clipboard.');
+    notifications.show({ message: 'Copied invite code to clipboard.' });
   };
 
   // Wraps the same code in a sign-up URL, so the person we invite lands on a
@@ -55,53 +64,47 @@ export default function InvitePage() {
 
     try {
       await navigator.clipboard.writeText(link);
-      window.alert('Copied invite link to clipboard.');
+      notifications.show({ message: 'Copied invite link to clipboard.' });
     } catch {
       // Clipboard can be blocked (no HTTPS, denied permission). The link is
       // rendered below the button either way, so it stays copyable by hand.
-      window.alert('Copy the link below to share it.');
+      notifications.show({ color: 'yellow', message: 'Copy the link below to share it.' });
     }
   };
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-[800px] px-four pt-four">
-        <p className="text-text-secondary">Loading…</p>
-      </main>
+      <Container size={800} px="lg" pt="lg">
+        <LoadingState />
+      </Container>
     );
   }
 
   return (
-    <main className="mx-auto max-w-[800px] px-four pt-four">
-      <p className="text-text-secondary">
-        Share this code with family members so they can join {family?.name}.
-      </p>
+    <Container size={800} px="lg" pt="lg">
+      <Text c="dimmed">Share this code with family members so they can join {family?.name}.</Text>
 
-      <div className="mt-four flex flex-col items-center gap-one rounded-two bg-background-element py-four">
-        <span className="text-3xl font-bold tracking-widest">{family?.invite_code}</span>
-      </div>
+      <Paper bg="var(--color-background-element)" py="lg" radius="md" mt="lg">
+        <Text ta="center" fz={30} fw={700} style={{ letterSpacing: '0.15em' }}>
+          {family?.invite_code}
+        </Text>
+      </Paper>
 
-      <button
-        type="button"
-        onClick={onShare}
-        className="mt-four w-full rounded-two bg-text py-three text-center font-semibold text-background"
-      >
-        Share invite code
-      </button>
+      <Stack gap="md" mt="lg">
+        <Button size="md" onClick={onShare}>
+          Share invite code
+        </Button>
 
-      <button
-        type="button"
-        onClick={onGenerateLink}
-        className="mt-three w-full rounded-two border border-background-selected py-three text-center font-semibold text-text"
-      >
-        Generate link
-      </button>
+        <Button size="md" variant="default" onClick={onGenerateLink}>
+          Generate link
+        </Button>
 
-      {inviteLink && (
-        <p className="mt-three break-all text-center font-mono text-sm text-text-secondary">
-          {inviteLink}
-        </p>
-      )}
-    </main>
+        {inviteLink && (
+          <Text size="sm" c="dimmed" ff="monospace" ta="center" style={{ wordBreak: 'break-all' }}>
+            {inviteLink}
+          </Text>
+        )}
+      </Stack>
+    </Container>
   );
 }

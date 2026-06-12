@@ -1,9 +1,12 @@
 'use client';
 
+import { Button, Center, Stack, Text, Title } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { LoadingState } from '@/components/loading-state';
 import { joinFamily } from '@/lib/families';
 import { clearPendingInviteCode, readPendingInviteCode } from '@/lib/invite';
 
@@ -32,7 +35,11 @@ export default function WelcomePage() {
         // through to the buttons below.
         clearPendingInviteCode();
         if (cancelled) return;
-        window.alert(err instanceof Error ? err.message : 'Could not join that family.');
+        notifications.show({
+          color: 'red',
+          title: 'Could not join that family',
+          message: err instanceof Error ? err.message : 'Could not join that family.',
+        });
         setJoining(false);
       }
     })();
@@ -44,35 +51,29 @@ export default function WelcomePage() {
 
   if (joining) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-text">
-        <p className="text-text-secondary">Joining your family…</p>
-      </main>
+      <Center mih="100vh">
+        <LoadingState label="Joining your family…" />
+      </Center>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col justify-between bg-background px-four pb-six pt-six text-text">
-      <div className="mt-six flex flex-col gap-three text-center">
-        <h1 className="text-3xl font-bold">Famfetti</h1>
-        <p className="text-text-secondary">
-          Create a family to get started, or join one with an invite code.
-        </p>
-      </div>
+    <Stack mih="100vh" justify="space-between" px="lg" py={64}>
+      <Stack gap="md" ta="center" mt={64}>
+        <Title order={1} fz={30}>
+          Famfetti
+        </Title>
+        <Text c="dimmed">Create a family to get started, or join one with an invite code.</Text>
+      </Stack>
 
-      <div className="flex flex-col gap-three">
-        <Link
-          href="/create-family"
-          className="rounded-two bg-text py-three text-center font-semibold text-background"
-        >
+      <Stack gap="md">
+        <Button component={Link} href="/create-family" size="md">
           Create a family
-        </Link>
-        <Link
-          href="/join-family"
-          className="rounded-two border border-background-selected py-three text-center font-semibold text-text"
-        >
+        </Button>
+        <Button component={Link} href="/join-family" size="md" variant="default">
           Join with invite code
-        </Link>
-      </div>
-    </main>
+        </Button>
+      </Stack>
+    </Stack>
   );
 }

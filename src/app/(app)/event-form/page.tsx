@@ -1,8 +1,23 @@
 'use client';
 
+import {
+  Button,
+  Checkbox,
+  Chip,
+  Container,
+  Group,
+  Input,
+  Modal,
+  Stack,
+  Text,
+  Textarea,
+  TextInput,
+} from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
+import { LoadingState } from '@/components/loading-state';
 import {
   createEvent,
   deleteEvent,
@@ -29,9 +44,9 @@ export default function EventFormPage() {
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-[800px] px-four pt-four">
-          <p className="text-text-secondary">Loading…</p>
-        </main>
+        <Container size={800} px="lg" pt="lg">
+          <LoadingState />
+        </Container>
       }
     >
       <EventForm />
@@ -54,9 +69,11 @@ function EventForm() {
   const [notes, setNotes] = useState('');
   const [recurring, setRecurring] = useState(true);
 
+  const [errors, setErrors] = useState<{ title?: string; date?: string }>({});
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (!isEdit || !id) return;
@@ -71,7 +88,11 @@ function EventForm() {
         setNotes(event.notes ?? '');
         setRecurring(event.recurring);
       } catch (e) {
-        window.alert(e instanceof Error ? e.message : 'Could not load event.');
+        notifications.show({
+          color: 'red',
+          title: 'Could not load event',
+          message: e instanceof Error ? e.message : 'Could not load event.',
+        });
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -84,18 +105,20 @@ function EventForm() {
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!familyId || !userId) {
-      window.alert('Family or user not loaded yet.');
+      notifications.show({
+        color: 'red',
+        title: 'Not ready yet',
+        message: 'Family or user not loaded yet.',
+      });
       return;
     }
+
     const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      window.alert('Please give the event a title.');
-      return;
-    }
-    if (!DATE_RE.test(date)) {
-      window.alert('Use the format YYYY-MM-DD (e.g. 2025-05-22).');
-      return;
-    }
+    const nextErrors: typeof errors = {};
+    if (!trimmedTitle) nextErrors.title = 'Please give the event a title.';
+    if (!DATE_RE.test(date)) nextErrors.date = 'Use the format YYYY-MM-DD (e.g. 2025-05-22).';
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
     const input: EventInput = {
       title: trimmedTitle,
@@ -114,7 +137,11 @@ function EventForm() {
       }
       router.back();
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Save failed.');
+      notifications.show({
+        color: 'red',
+        title: 'Save failed',
+        message: err instanceof Error ? err.message : 'Save failed.',
+      });
     } finally {
       setSaving(false);
     }
@@ -122,14 +149,17 @@ function EventForm() {
 
   const onDelete = async () => {
     if (!id) return;
-    if (!window.confirm('Delete event? This can’t be undone.')) return;
-
+    setConfirmingDelete(false);
     setDeleting(true);
     try {
       await deleteEvent(id);
       router.back();
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Delete failed.');
+      notifications.show({
+        color: 'red',
+        title: 'Delete failed',
+        message: err instanceof Error ? err.message : 'Delete failed.',
+      });
     } finally {
       setDeleting(false);
     }
@@ -137,110 +167,115 @@ function EventForm() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-[800px] px-four pt-four">
-        <p className="text-text-secondary">Loading…</p>
-      </main>
+      <Container size={800} px="lg" pt="lg">
+        <LoadingState />
+      </Container>
     );
   }
 
   const busy = saving || deleting;
 
   return (
-    <main className="mx-auto max-w-[800px] px-four pb-six pt-four">
-      <form onSubmit={onSave} className="flex flex-col gap-four">
-        <div className="flex flex-col gap-one">
-          <span className="text-sm font-semibold text-text-secondary">Title</span>
-          <input
-            type="text"
+    <Container size={800} px="lg" pt="lg" pb={64}>
+      <form onSubmit={onSave}>
+        <Stack gap="lg">
+          <TextInput
+            label="Title"
             placeholder="Mom's birthday"
+            size="md"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            error={errors.title}
+            onChange={(e) => {
+              setTitle(e.currentTarget.value);
+              setErrors((prev) => ({ ...prev, title: undefined }));
+            }}
             disabled={busy}
-            className="rounded-two border border-background-selected px-three py-three text-base"
           />
-        </div>
 
-        <div className="flex flex-col gap-one">
-          <span className="text-sm font-semibold text-text-secondary">Date</span>
-          <input
+          <TextInput
             type="date"
+            label="Date"
+            size="md"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            error={errors.date}
+            onChange={(e) => {
+              setDate(e.currentTarget.value);
+              setErrors((prev) => ({ ...prev, date: undefined }));
+            }}
             disabled={busy}
-            className="rounded-two border border-background-selected px-three py-three text-base"
           />
-        </div>
 
-        <div className="flex flex-col gap-one">
-          <span className="text-sm font-semibold text-text-secondary">Type</span>
-          <div className="flex flex-wrap gap-two">
-            {TYPES.map((t) => {
-              const selected = type === t.value;
-              return (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setType(t.value)}
-                  disabled={busy}
-                  className={
-                    'rounded-full border border-background-selected px-three py-two font-semibold ' +
-                    (selected ? 'bg-text text-background' : 'bg-background-element text-text')
-                  }
-                >
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+          <Input.Wrapper label="Type">
+            <Chip.Group
+              multiple={false}
+              value={type}
+              onChange={(value) => setType(value as EventType)}
+            >
+              <Group gap="sm" mt="xs">
+                {TYPES.map((t) => (
+                  <Chip key={t.value} value={t.value} disabled={busy}>
+                    {t.label}
+                  </Chip>
+                ))}
+              </Group>
+            </Chip.Group>
+          </Input.Wrapper>
 
-        <label className="flex items-center gap-three">
-          <input
-            type="checkbox"
+          <Checkbox
+            label="Repeats yearly"
+            description="Birthdays and anniversaries usually do."
             checked={recurring}
-            onChange={(e) => setRecurring(e.target.checked)}
+            onChange={(e) => setRecurring(e.currentTarget.checked)}
             disabled={busy}
-            className="h-5 w-5"
           />
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-text-secondary">Repeats yearly</span>
-            <span className="text-sm text-text-secondary">
-              Birthdays and anniversaries usually do.
-            </span>
-          </div>
-        </label>
 
-        <div className="flex flex-col gap-one">
-          <span className="text-sm font-semibold text-text-secondary">Notes</span>
-          <textarea
+          <Textarea
+            label="Notes"
             placeholder="Anything to remember"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            disabled={busy}
             rows={4}
-            className="rounded-two border border-background-selected px-three py-three text-base"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={busy}
-          className="mt-two rounded-two bg-text py-three text-center font-semibold text-background disabled:opacity-60"
-        >
-          {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create event'}
-        </button>
-
-        {isEdit && (
-          <button
-            type="button"
-            onClick={onDelete}
+            size="md"
+            value={notes}
+            onChange={(e) => setNotes(e.currentTarget.value)}
             disabled={busy}
-            className="py-three text-center font-semibold text-[#d12c2c] disabled:opacity-60"
-          >
-            {deleting ? 'Deleting…' : 'Delete event'}
-          </button>
-        )}
+          />
+
+          <Button type="submit" size="md" mt="sm" loading={saving} disabled={deleting}>
+            {isEdit ? 'Save changes' : 'Create event'}
+          </Button>
+
+          {isEdit && (
+            <Button
+              variant="subtle"
+              color="red"
+              size="md"
+              onClick={() => setConfirmingDelete(true)}
+              loading={deleting}
+              disabled={saving}
+            >
+              Delete event
+            </Button>
+          )}
+        </Stack>
       </form>
-    </main>
+
+      <Modal
+        opened={confirmingDelete}
+        onClose={() => setConfirmingDelete(false)}
+        title="Delete event?"
+        centered
+      >
+        <Stack gap="lg">
+          <Text c="dimmed">This can&apos;t be undone.</Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => setConfirmingDelete(false)}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={onDelete}>
+              Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Container>
   );
 }
